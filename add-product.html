@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management - Add Product</title>
+    <style>
+
+        body {
+    margin: 0;
+    padding: 0;
+     }
+        .container{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        h2{
+            color: #ff3c00;
+            padding: 10px;
+        }
+        
+        .add-product-form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            width: 250px; 
+            height: 300px;
+            padding: 100px;
+            margin: 50px;
+            background: #f9f9f9;
+        }
+        
+        .add-product-form input{
+            width: 250px;
+            height: 18px;
+            margin: 10px;
+            margin-top: 8px;
+        }
+        
+        .center-btn {
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+        }
+        
+        .center-btn button {
+            width: 60px;
+            height: 40px;
+            background: #ff3c00;
+            color: #fff;
+        }
+        
+        header{
+            display: flex;
+            padding-inline: 50px;
+            padding-block: 8px;
+            background-color: black;
+            color: aliceblue;
+        }
+        
+        nav{
+            display: flex;
+            gap: 16px;
+            position: absolute;
+            right: 50px;
+        }
+        a{
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>Product Management
+        <nav>
+            <a href="products.html">All Products</a>
+            <a href="add-product.html" class="active">Add Product</a>
+        </nav>
+    </header>
+    
+    <div class="container"> 
+        <div class="add-product-form">
+            <h2>Add Product</h2>
+            <form id="add-product-form">
+                <label>Name:
+                    <input name="add-name" id="name" required />
+                </label><br />
+                <label>Image:
+                    <input name="add-image" id="image" required />
+                </label><br />
+                <label>Price:
+                    <input type="number" name="add-price" id="price" required />
+                </label><br />
+                <label>Color:
+                    <input name="add-colors" id="colors" required />
+                </label><br />
+                <div class="center-btn">
+                    <button type="submit">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="products-service.js"></script>
+    <script>
+        document.getElementById('add-product-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newProduct = {
+                name: document.getElementById('name').value,
+                image: document.getElementById('image').value,
+                price: parseFloat(document.getElementById('price').value),
+                colors: document.getElementById('colors').value
+            };
+            
+            window.productsService.addProduct(newProduct);
+            document.getElementById('add-product-form').reset();
+            window.location.href = 'products.html';
+        });
+    </script>
+</body>
+</html>

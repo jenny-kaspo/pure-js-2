@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management - All Products</title>
+    <style>
+
+     body {
+    margin: 0;
+    padding: 0;
+     }
+    .container {
+    display: flex;
+    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .product-list {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+     justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .product-card {
+    width: 200px;
+    text-align: center;
+    cursor: pointer;
+  }
+  
+  .product-card img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+  }
+        
+        .edit-form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            width: 300px; 
+            height: 300px;
+            padding: 50px;
+            margin: 25px;
+            background: #f9f9f9;
+        }
+        
+        .edit-form input {
+            width: 200px;
+            height: 18px;
+            margin: 10px;
+            margin-top: 8px;
+        }
+        
+        .center-btn {
+            display: flex;
+            justify-content: space-evenly;
+            padding-top: 10px;
+        }
+        
+        .center-btn button {
+            width: 50px;
+            height: 30px;
+            background: #ff3c00;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        header{
+    display: flex;
+    padding-inline: 50px;
+    padding-block: 8px;
+    background-color: black;
+    color: aliceblue;
+    }
+
+    nav{
+        display: flex;
+        gap: 16px;
+        position: absolute;
+        right: 50px;
+    }
+    a{
+        color: white;
+    }
+    </style>
+</head>
+<body>
+    <header>Product Management
+        <nav>
+            <a href="products.html" class="active">All Products</a>
+            <a href="add-product.html">Add Product</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="product-list" id="products-container">
+            <!-- Products will be loaded here -->
+        </div>
+        
+        <div class="edit-form" id="edit-form" style="display: none;">
+            <h2>Edit Product</h2>
+            <form id="edit-product-form">
+                <label>Name:
+                    <input name="name" id="edit-name" required />
+                </label><br />
+                <label>Image:
+                    <input name="image" id="edit-image" required />
+                </label><br />
+                <label>Price:
+                    <input type="number" name="price" id="edit-price" required />
+                </label><br />
+                <label>Color:
+                    <input name="color" id="edit-colors" required />
+                </label><br />
+                <input type="hidden" id="edit-id" />
+                <div class="center-btn">
+                    <button type="submit">Save</button>
+                    <button type="button" id="cancel-edit">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="products-service.js"></script>
+    <script>
+        let editMode = false;
+        let selectedItem = null;
+        
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            const products = window.productsService.getProducts();
+            
+            container.innerHTML = '';
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <div class="button-container">
+                        <button class="edit-btn" data-id="${product.id}">Edit</button>
+                        <button class="delete-btn" data-id="${product.id}">Delete</button>
+                        <button class="view-btn" data-id="${product.id}">View</button>
+                    </div>
+                `;
+                container.appendChild(productCard);
+            });
+            
+            // Add event listeners
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.getAttribute('data-id'));
+                    onEdit(id);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.getAttribute('data-id'));
+                    onDelete(id);
+                });
+            });
+            
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.getAttribute('data-id'));
+                    viewDetails(id);
+                });
+            });
+        }
+        
+        function onEdit(id) {
+            const product = window.productsService.getProducts().find(p => p.id === id);
+            if (!product) return;
+            
+            selectedItem = product;
+            editMode = true;
+            
+            document.getElementById('edit-id').value = product.id;
+            document.getElementById('edit-name').value = product.name;
+            document.getElementById('edit-image').value = product.image;
+            document.getElementById('edit-price').value = product.price;
+            document.getElementById('edit-colors').value = product.colors;
+            
+            document.getElementById('edit-form').style.display = 'flex';
+        }
+        
+        function onDelete(id) {
+            window.productsService.deleteProduct(id);
+            if (selectedItem && selectedItem.id === id) {
+                editMode = false;
+                selectedItem = null;
+                document.getElementById('edit-form').style.display = 'none';
+            }
+            renderProducts();
+        }
+        
+        function viewDetails(id) {
+            const product = window.productsService.getProducts().find(p => p.id === id);
+            if (product) {
+                window.productsService.setSelectedProduct(product);
+                window.location.href = 'details.html';
+            }
+        }
+        
+        function onEditSave(e) {
+            e.preventDefault();
+            
+            const updatedProduct = {
+                id: parseInt(document.getElementById('edit-id').value),
+                name: document.getElementById('edit-name').value,
+                image: document.getElementById('edit-image').value,
+                price: parseFloat(document.getElementById('edit-price').value),
+                colors: document.getElementById('edit-colors').value
+            };
+            
+            window.productsService.editProduct(updatedProduct);
+            editMode = false;
+            selectedItem = null;
+            
+            document.getElementById('edit-form').style.display = 'none';
+            document.getElementById('edit-product-form').reset();
+            
+            renderProducts();
+        }
+        
+        function onEditCancel() {
+            editMode = false;
+            selectedItem = null;
+            document.getElementById('edit-form').style.display = 'none';
+            document.getElementById('edit-product-form').reset();
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProducts();
+            
+            document.getElementById('edit-product-form').addEventListener('submit', onEditSave);
+            document.getElementById('cancel-edit').addEventListener('click', onEditCancel);
+        });
+    </script>
+</body>
+</html>
